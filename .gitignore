@@ -1,0 +1,10 @@
+﻿*.safetensors
+*.pkl
+*.bin
+*.csv
+*.log
+__pycache__/
+ml_models/
+.Resumevenv/
+.DS_Store
+backend/.env

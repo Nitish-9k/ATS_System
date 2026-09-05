@@ -16,30 +16,33 @@ from backend.core.config import(
 
 # from backend.api.routes import router 
 
-logger=logging.getLogger("ats_resume_scorer")
+logger = logging.getLogger("ats_resume_scorer")
+
 
 @asynccontextmanager
-async def lifespan(app:FastAPI):
+async def lifespan(app: FastAPI):
     logger.info("starting ATS Resume analyze api")
 
     logger.info(f"loading spacy nlp model: {SPACY_MODEL_PRIMARY}")
     import spacy
+
     try:
-        app.state.nlp=spacy.load(SPACY_MODEL_PRIMARY)
-        logger.info(f"Loaded{SPACY_MODEL_PRIMARY}")
+        app.state.nlp = spacy.load(SPACY_MODEL_PRIMARY)
+        logger.info(f"Loaded {SPACY_MODEL_PRIMARY}")
     except OSError:
-        logger.warning(f"{SPACY_MODEL_PRIMARY} not found -falling back to {SPACY_MODEL_SECONDARY}")
-        app.state.nlp=spacy.load(SPACY_MODEL_SECONDARY)
-        logger.info(f"loaded {SPACY_MODEL_SECONDARY} (fallback)")
+        logger.warning(f"{SPACY_MODEL_PRIMARY} not found - falling back to {SPACY_MODEL_SECONDARY}")
+        app.state.nlp = spacy.load(SPACY_MODEL_SECONDARY)
+        logger.info(f"Loaded {SPACY_MODEL_SECONDARY} (fallback)")
 
-        logger.info("All model loaded .API is ready to serve requests")
+    logger.info("All models loaded. API is ready to serve requests")
 
-    yield
-
+    try:
+        yield
+    finally:
         logger.info("shutting down the api")
 
 
-app= FastAPI(
+app = FastAPI(
     title=APP_TITLE,
     description=APP_DESCRIPTION,
     version=APP_VERSION,
@@ -51,21 +54,25 @@ app= FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allowed_origin=[*ALLOWED_ORIGINS],
+    allow_origins=[*ALLOWED_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers =["*"],
-
-
+    allow_headers=["*"],
 )
 
-# app.include_router(routes)
+# include routes if present
+if hasattr(routes, "router"):
+    app.include_router(routes.router)
+else:
+    logger.warning("No router found in backend.api.routes — no endpoints registered")
 
-if __name__=="__main__":
-    import uvicorn 
+
+if __name__ == "__main__":
+    import uvicorn
+
     uvicorn.run(
         'backend.main:app',
-        host   ='0.0.0.0',
+        host='0.0.0.0',
         port=8000,
-        reload=True, # auto-restart on code changes (dev only)
+        reload=True,  # auto-restart on code changes (dev only)
     )

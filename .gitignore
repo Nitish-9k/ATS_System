@@ -8,3 +8,4 @@ ml_models/
 .Resumevenv/
 .DS_Store
 backend/.env
+backend/database/*.db

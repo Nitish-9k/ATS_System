@@ -16,6 +16,10 @@ from backend.core.config import (
 # from backend.api.routes import router 
 
 logger = logging.getLogger("ats_resume_scorer")
+<<<<<<< HEAD
+=======
+
+>>>>>>> b018ef731707e198b24bbd85677f38b6c0bc9357
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,8 +27,10 @@ async def lifespan(app: FastAPI):
 
     logger.info(f"loading spacy nlp model: {SPACY_MODEL_PRIMARY}")
     import spacy
+
     try:
         app.state.nlp = spacy.load(SPACY_MODEL_PRIMARY)
+<<<<<<< HEAD
         logger.info("Loaded %s", SPACY_MODEL_PRIMARY)
     except OSError:
         logger.warning(
@@ -42,6 +48,15 @@ async def lifespan(app: FastAPI):
     logger.info("All models loaded. API is ready to serve requests")
     from backend.database.local_db import init_db
     init_db()
+=======
+        logger.info(f"Loaded {SPACY_MODEL_PRIMARY}")
+    except OSError:
+        logger.warning(f"{SPACY_MODEL_PRIMARY} not found - falling back to {SPACY_MODEL_SECONDARY}")
+        app.state.nlp = spacy.load(SPACY_MODEL_SECONDARY)
+        logger.info(f"Loaded {SPACY_MODEL_SECONDARY} (fallback)")
+
+    logger.info("All models loaded. API is ready to serve requests")
+>>>>>>> b018ef731707e198b24bbd85677f38b6c0bc9357
 
     try:
         yield
@@ -61,19 +76,36 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
+<<<<<<< HEAD
     allow_origins=ALLOWED_ORIGINS,
+=======
+    allow_origins=[*ALLOWED_ORIGINS],
+>>>>>>> b018ef731707e198b24bbd85677f38b6c0bc9357
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+<<<<<<< HEAD
 app.include_router(routes.router)
 
 if __name__ == "__main__":
     import uvicorn
+=======
+# include routes if present
+if hasattr(routes, "router"):
+    app.include_router(routes.router)
+else:
+    logger.warning("No router found in backend.api.routes — no endpoints registered")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+>>>>>>> b018ef731707e198b24bbd85677f38b6c0bc9357
     uvicorn.run(
         'backend.main:app',
-        host   ='0.0.0.0',
+        host='0.0.0.0',
         port=8000,
-        reload=True, # auto-restart on code changes (dev only)
+        reload=True,  # auto-restart on code changes (dev only)
     )

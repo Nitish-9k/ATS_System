@@ -5,6 +5,6 @@
 *.log
 __pycache__/
 
-.Resumevenv/
+
 .DS_Store
 
